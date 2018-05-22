@@ -3,9 +3,11 @@
 Bot testing
 
 Pre req: Python v3.*
+```
 For sound playback:
            PyNaCl
            ffmpeg.exe
+```
 For building and running on bash:
 ```
 py -3 -m pip install discord
