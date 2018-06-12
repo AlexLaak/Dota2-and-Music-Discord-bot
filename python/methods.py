@@ -16,7 +16,7 @@ ranks = [10, "Herald 0", 11, "Herald 1", 12, "Herald 2", 13, "Herald 3", 14, "He
          40, "Archon 0", 41, "Archon 1", 42, "Archon 2", 43, "Archon 3", 44, "Archon 4", 45, "Archon 5",
          50, "Legend 0", 51, "Legend 1", 52, "Legend 2", 53, "Legend 3", 54, "Legend 4", 55, "Legend 5",
          60, "Ancient 0", 61, "Ancient 1", 62, "Ancient 2", 63, "Ancient 3", 64, "Ancient 4", 65, "Ancient 5",
-         70, "Divine 0", 71, "Divine 1", 72, "Divine 2", 73, "Divine 3", 74, "Divine 4", 75, "Divine 5", 76, "Divine 6"]
+         70, "Divine 0", 71, "Divine 1", 72, "Divine 2", 73, "Divine 3", 74, "Divine 4", 75, "Divine 5", 80, "Immortal"]
 
 async def playedWith(author,msg,client,givenID):
     matches = []
@@ -160,7 +160,7 @@ async def queryProfileNoAuth(msg,client,ID):
                 else:
                     e.add_field(name="Rank", value=rank, inline=False)
             else:
-                e.add_field(name="Rank", value="Divine 6  (" + lBoardRank + ")", inline=False)
+                e.add_field(name="Rank", value="Immortal  (" + lBoardRank + ")", inline=False)
             e.add_field(name="Win/Loss", value= wins + "-" + losses + " (" + ratio[:5] + "%)",
                         inline=False)
             e.add_field(name="Top Heroes", value=heroNamesFinal[0] + " (" + heroWinRates[0][:5] + "%)" +
@@ -263,7 +263,10 @@ async def queryProfile(author,msg,client):
             ratio *= 100  # *
             ratio = str(ratio)  # to one line
             mmr = str(data['competitive_rank'])
-            rank = ranks[ranks.index(int(data['rank_tier'])) + 1]
+            if (data['rank_tier'] != None):
+                rank = ranks[ranks.index(int(data['rank_tier'])) + 1]
+            else:
+                rank = "No medal"
             e = discord.Embed(title=name, url="https://www.dotabuff.com/players/" + ID, color=0xff0000)
             thumbnail = str(data['profile']['avatarmedium'])
             e.set_thumbnail(url=thumbnail)
@@ -296,7 +299,10 @@ async def checkPricePool():
     soup = BeautifulSoup(r.text, "html.parser")
     soup2 = BeautifulSoup(r.text, "html.parser")
     pool = soup.find('h1',{'class':'ui green header'}).text
-    text = soup2.find('div',{'class':'ui green message'}).text
+    try:
+        text = soup2.find('div',{'class':'ui green message'}).text
+    except Exception as e:
+        text = soup2.find('div',{'class':'ui red message'}).text
     return "```TI8 Prize pool atm:\n" + pool + "\n\n" + text + "```"
 
 async def queryLastMatch(author,msg,client):
@@ -359,6 +365,7 @@ async def queryHelper(author):
         r = requests.get(url=URL)
         data = r.json()
         matchID = str(data[0]['match_id'])
+        #matchID = "3911574073"
         URL2 = "https://api.opendota.com/api/matches/" + matchID
         r2 = requests.get(url=URL2)
         data2 = r2.json()
@@ -397,7 +404,9 @@ async def playedWithLastGame(givenIDs, myID, msg, client):
     print(IDs)
 
     for x in range(0,len(IDs)):
+        print("loopis")
         if (givenIDs[x] not in whitelist):
+            print("ifsisäal")
             matches = []
             try:
                 URL = "https://api.opendota.com/api/players/" + myID + "/matches?included_account_id=" + givenIDs[x]
@@ -406,10 +415,6 @@ async def playedWithLastGame(givenIDs, myID, msg, client):
                 r2 = requests.get(url=URL2)
                 data = r.json()
                 data2 = r2.json()
-                if (len(r.content) <= 6):
-                    return
-                if (len(r2.content) <= 6):
-                    return
                 i = 0  #set to 1 if want to skip first game
                 while True:
                     try:
@@ -454,3 +459,13 @@ async def getProfileID(author):
         print(ID)
         return ID
     return "None"
+
+async def leave(self, client):
+    server = client.message.server
+    state = self.get_voice_state(server)
+
+    try:
+        state.audio_player.cancel()
+        await state.voice.disconnect()
+    except:
+        pass
