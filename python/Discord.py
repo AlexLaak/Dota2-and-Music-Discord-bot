@@ -1,4 +1,4 @@
-import discord
+﻿import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
 import asyncio
@@ -15,6 +15,7 @@ whitelistIDs = []
 players = {}
 pauseQueue = queue.Queue()
 playQueue = queue.Queue()
+radioQueue = queue.Queue()
 
 steamIDremoval = 76561197960265728
 
@@ -24,17 +25,20 @@ async def check_if_playing(message):
             pass
         else:
             if (playQueue.empty()):
+                await client.change_presence(game=discord.Game(name='!commands'))
                 break
             elif (pauseQueue.empty() == False):
                 print("paused")
                 pass
             else:
                 voice = client.voice_client_in(message.author.server)
-                player = await voice.create_ytdl_player(playQueue.get())
+                url = playQueue.get()
+                player = await voice.create_ytdl_player(url)
                 player.volume = 0.4
                 players[message.server.id] = player
                 player.start()
                 print("swapping song")
+                await client.change_presence(game=discord.Game(name=await getYoutubeTitle(url)))
         await asyncio.sleep(5)
 
 @client.event
@@ -45,11 +49,8 @@ async def on_ready():
 async def on_message(message):
 
     channel = message.channel.name
-    if (channel != "pakettipaskaa"):
+    if (channel != "pakettipaskaa"):                #To listen only messages from certain channel
         return
-
-    #print(client.get_server('153251390909579264').name)
-    print(client.is_voice_connected(message.author.server))
 
     try:
         namesAndIDs = pickle.load(open("save.p", "rb"))
@@ -76,12 +77,14 @@ async def on_message(message):
             await client.send_message(message.channel, "Invalid ID!")
         else:
             namesAndIDs.append(DotaID)
+            namesAndIDs.append(message.author.name)
             namesAndIDs.append(message.author.id)
         pickle.dump(namesAndIDs, open("save.p", "wb"))
 
     if (message.content.upper().startswith("!DELETE_ID") and message.author.id in namesAndIDs):
         print("Comamnd was given by:")
         print(message.author)
+        namesAndIDs.remove(namesAndIDs[namesAndIDs.index(message.author.id) - 2])
         namesAndIDs.remove(namesAndIDs[namesAndIDs.index(message.author.id) - 1])
         namesAndIDs.remove(message.author.id)
         pickle.dump(namesAndIDs, open("save.p", "wb"))
@@ -119,7 +122,16 @@ async def on_message(message):
         print("Comamnd was given by:")
         print(message.author)
         print(whitelistIDs)
-        await client.send_message(message.channel, namesAndIDs)  # print list of names
+        listToPrint = ""
+        print(len(namesAndIDs))
+        b = 0
+        for x in range(0,len(namesAndIDs)):
+            print(b)
+            listToPrint += "Dota ID: " + namesAndIDs[b] + " Username: " + namesAndIDs[b+1] + '\n'
+            b = b + 3
+            if (b >= len(namesAndIDs)):
+                break
+        await client.send_message(message.channel, "```"+listToPrint+"```")  # print list of names
 
     if (message.content.upper() == "!ME"):
         print("Comamnd was given by:")
@@ -186,26 +198,53 @@ async def on_message(message):
         print("Comamnd was given by:")
         print(message.author)
         await client.send_message(message.channel, "List of commands:"
-                                                   "\n```!add_id <dotaID>"              
+                                                   "\n```!sounds"             
+                                                   "\n!radio"
+                                                   "\n!yt <youtube link>"
+                                                   "\n!play <youtube search>         e.x !play lössi"
+                                                   "\n!playque"
+                                                   "\n!stop"
+                                                   "\n!volume <value>       (0-2.0)"
+                                                   "\n!skip"
+                                                   "\n"
+                                                   "\nDota Commands"
+                                                   "\n!add_id <dotaID>"
                                                    "\n!delete_id"
                                                    "\n!list"
                                                    "\n!me"
                                                    "\n!pw <dotaID/steam64>"
-                                                   "\n!sounds"
                                                    "\n!profile <dotaID/steam64>"
                                                    "\n!lastmatch"
                                                    "\n!lastmatchplayers"   
                                                    "\n!prize```")
+
+    if (message.content.upper() == "!RADIO" or message.content.upper() == "!RADIOCOMMANDS"):
+        print("Comamnd was given by:")
+        print(message.author)
+        await client.send_message(message.channel, "List of radio commands:"
+                                                   "\n```!radiorock"              
+                                                   "\n!nrj"
+                                                   "\n!loop"
+                                                   "\n!hitmix"
+                                                   "\n!summon"
+                                                   "\n!leave"
+                                                   "\n!resume"
+                                                   "\n!pause"
+                                                   "\n!stop```")
+
     if (message.content.upper() == "!SOUNDS"):
         print("Comamnd was given by:")
         print(message.author)
-        await client.send_message(message.channel, "List of sound commands:"
+        await client.send_message(message.channel, "List of sound clips:"
                                                     "\n```!summon"
                                                     "\n!leave"
                                                     "\n!joni"
                                                     "\n!joni2"
                                                     "\n!joni3"
+                                                    "\n!joni4"
                                                     "\n!jonisekoo"
+                                                    "\n!jonilogic"
+                                                    "\n!joona" 
                                                     "\n!jafar"
                                                     "\n!enigma"
                                                     "\n!clasu"
@@ -216,6 +255,7 @@ async def on_message(message):
                                                     "\n!marko3"
                                                     "\n!lehtone"
                                                     "\n!lehtone1"
+                                                    "\n!lehtone2"
                                                     "\n!muija"
                                                     "\n!oliivi"
                                                     "\n!ismo1"
@@ -237,6 +277,9 @@ async def on_message(message):
 
             #############SOUNDS###########
     if (message.content.upper() == "!AAA" or message.content.upper() == "!AA"):
+        if (players[message.server.id].is_playing()):
+            await client.send_message(message.channel, "Currently playing! use !stop to stop playing!")
+            return
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -249,6 +292,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/aaa.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -257,7 +301,6 @@ async def on_message(message):
             counter = counter + 1
         if (joined == False):
             await voice.disconnect()
-        print("haLÖOOO")
 
     if (message.content.upper() == "!SUMMON"):
         if (client.is_voice_connected(message.author.server) == True):
@@ -275,6 +318,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!JAFAR"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -287,6 +336,8 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/jafar.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -297,6 +348,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!ENIGMA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -309,6 +366,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/enigma.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -319,6 +377,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!JONI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -331,6 +395,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/Pud_laugh_05.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -342,6 +407,12 @@ async def on_message(message):
         #await client.join_voice_channel(message.author.voice_channel)
 
     if (message.content.upper() == "!JONI2"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -354,6 +425,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/Chaknight_laugh_17.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -364,6 +436,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!CLASU" or message.content.upper() == "!NYT"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -376,6 +454,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/clasu.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -386,6 +465,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!HÄVITTY" or message.content.upper() == "!LOST"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -398,6 +483,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/havitty.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -408,6 +494,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!KIVAARI" or message.content.upper() == "!KIVÄÄRI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -420,6 +512,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/kivääri.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -430,6 +523,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MARKO1"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -442,6 +541,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/marko1.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 6  # In seconds
@@ -452,6 +552,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!LEHTONE" or message.content.upper() == "!MORJESTA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -464,6 +570,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/morjesta.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -474,6 +581,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MOTIGONE" or message.content.upper() == "!MOTI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -486,6 +599,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/motigone.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -496,6 +610,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MUIJA" or message.content.upper() == "!HOMMAAMUIJA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -508,6 +628,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/muija.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -518,6 +639,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!OLIIVI" or message.content.upper() == "!LOIRI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -530,6 +657,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/oliivi.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -540,6 +668,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!ONKELMA" or message.content.upper() == "!MARKO2"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -552,6 +686,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/onkelma.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 7  # In seconds
@@ -562,6 +697,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!PASKAA" or message.content.upper() == "!ISMO1"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -574,6 +715,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/paskaa.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -584,6 +726,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!VANTAALLE" or message.content.upper() == "!LEHTONE1"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -596,6 +744,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/potkin.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -606,6 +755,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!HÖPSIT" or message.content.upper() == "!RAKAS"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -618,6 +773,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/rakas.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -628,6 +784,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!DARUDE" or message.content.upper() == "!SANDSTORM"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -640,6 +802,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/sandstorm.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -650,6 +813,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!SINNEMENI" or message.content.upper() == "!MENI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -662,6 +831,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/sinnemeni.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -672,6 +842,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!TURPAKII" or message.content.upper() == "!ISMO2"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -684,6 +860,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/turpakii.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -694,6 +871,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MARKO3" or message.content.upper() == "!GRILLI"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -706,6 +889,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/arkiviholinen.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 9  # In seconds
@@ -716,6 +900,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MARKO4" or message.content.upper() == "!LEIVÄT"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -728,6 +918,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/leivat.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 9  # In seconds
@@ -738,6 +929,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!2KG" or message.content.upper() == "!SIIKA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -750,6 +947,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/2kgsiika.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -760,6 +958,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!KUVAA" or message.content.upper() == "!KUVAATULEE"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -772,6 +976,7 @@ async def on_message(message):
         else:
              voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/kuvaa.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 4  # In seconds
@@ -782,6 +987,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!MÖTKÖ" or message.content.upper() == "!MÖTKÖÖ"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -794,6 +1005,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/motko.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -804,6 +1016,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!OTASIIKA" or message.content.upper() == "!OTA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -816,6 +1034,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/otasiika.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 6  # In seconds
@@ -826,6 +1045,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!SIIKAHAN" or message.content.upper() == "!SIELLÄ"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -838,6 +1063,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/siikahan.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 7  # In seconds
@@ -848,6 +1074,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!TERVE" or message.content.upper() == "!ISMO3"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -860,6 +1092,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/terv.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 3  # In seconds
@@ -870,6 +1103,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!AAMUPALA" or message.content.upper() == "!PIZZAA" or message.content.upper() == "!MARKO3"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -882,6 +1121,7 @@ async def on_message(message):
         else:
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/aamupala.mp3')
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 15  # In seconds
@@ -892,6 +1132,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!JONI3" or message.content.upper() == "!ESA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -905,6 +1151,7 @@ async def on_message(message):
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/jonirepe.mp3')
         player.volume = 2.0
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 5  # In seconds
@@ -915,6 +1162,12 @@ async def on_message(message):
             await voice.disconnect()
 
     if (message.content.upper() == "!JONISEKOO" or message.content.upper() == "!JAFAR2"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
         if (client.is_voice_connected(message.author.server) == True):
             holder = client.voice_client_in(message.author.server)
             if (holder.channel != message.author.voice_channel):
@@ -928,6 +1181,7 @@ async def on_message(message):
             voice = client.voice_client_in(message.author.server)
         player = voice.create_ffmpeg_player('./sounds/jonisekoo.mp3')
         player.volume = 2.0
+        players[message.server.id] = player
         player.start()
         counter = 0
         duration = 20  # In seconds
@@ -937,16 +1191,163 @@ async def on_message(message):
         if (joined == False):
             await voice.disconnect()
 
+    if (message.content.upper() == "!JONILOGIC" or message.content.upper() == "!LOGIC"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        if (client.is_voice_connected(message.author.server) == True):
+            holder = client.voice_client_in(message.author.server)
+            if (holder.channel != message.author.voice_channel):
+                voice = client.voice_client_in(message.author.server)
+                await voice.disconnect()
+        joined = True
+        if (client.is_voice_connected(message.author.server) == False):
+            voice = await client.join_voice_channel(message.author.voice_channel)
+            joined = False
+        else:
+            voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player('./sounds/jonilogic.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
+        player.start()
+        counter = 0
+        duration = 5  # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+        if (joined == False):
+            await voice.disconnect()
+
+    if (message.content.upper() == "!LEHTONE2" or message.content.upper() == "!PAPAL"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        if (client.is_voice_connected(message.author.server) == True):
+            holder = client.voice_client_in(message.author.server)
+            if (holder.channel != message.author.voice_channel):
+                voice = client.voice_client_in(message.author.server)
+                await voice.disconnect()
+        joined = True
+        if (client.is_voice_connected(message.author.server) == False):
+            voice = await client.join_voice_channel(message.author.voice_channel)
+            joined = False
+        else:
+            voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player('./sounds/lehtonen.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
+        player.start()
+        counter = 0
+        duration = 5  # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+        if (joined == False):
+            await voice.disconnect()
+
+    if (message.content.upper() == "!JOONA" or message.content.upper() == "!KUOLIN"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        if (client.is_voice_connected(message.author.server) == True):
+            holder = client.voice_client_in(message.author.server)
+            if (holder.channel != message.author.voice_channel):
+                voice = client.voice_client_in(message.author.server)
+                await voice.disconnect()
+        joined = True
+        if (client.is_voice_connected(message.author.server) == False):
+            voice = await client.join_voice_channel(message.author.voice_channel)
+            joined = False
+        else:
+            voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player('./sounds/joona.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
+        player.start()
+        counter = 0
+        duration = 8  # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+        if (joined == False):
+            await voice.disconnect()
+
+    if (message.content.upper() == "!JOONA2" or message.content.upper() == "!LIMAA"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        if (client.is_voice_connected(message.author.server) == True):
+            holder = client.voice_client_in(message.author.server)
+            if (holder.channel != message.author.voice_channel):
+                voice = client.voice_client_in(message.author.server)
+                await voice.disconnect()
+        joined = True
+        if (client.is_voice_connected(message.author.server) == False):
+            voice = await client.join_voice_channel(message.author.voice_channel)
+            joined = False
+        else:
+            voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player('./sounds/limaa.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
+        player.start()
+        counter = 0
+        duration = 6  # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+        if (joined == False):
+            await voice.disconnect()
+
+    if (message.content.upper() == "!JONI4" or message.content.upper() == "!CHRONO"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        if (client.is_voice_connected(message.author.server) == True):
+            holder = client.voice_client_in(message.author.server)
+            if (holder.channel != message.author.voice_channel):
+                voice = client.voice_client_in(message.author.server)
+                await voice.disconnect()
+        joined = True
+        if (client.is_voice_connected(message.author.server) == False):
+            voice = await client.join_voice_channel(message.author.voice_channel)
+            joined = False
+        else:
+            voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player('./sounds/jonichrono.mp3')
+        player.volume = 2.0
+        players[message.server.id] = player
+        player.start()
+        counter = 0
+        duration = 6  # In seconds
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter = counter + 1
+        if (joined == False):
+            await voice.disconnect()
         #####SOUNDS END##########
 
     if (message.content.upper() == "EXIT" and message.author.id == '95497315078381568'):
-        print("Comamnd was given by:")
-        print(message.author)
         pickle.dump(namesAndIDs,open("save.p","wb"))
-        print("Exiting")
         exit()
 
-    if (message.content.upper().startswith("!YT")):
+    #DEPRECATED
+    if (message.content.upper().startswith("!vanhaaa")):
         try:
             if (players[message.server.id].is_playing()):
                 await client.send_message(message.channel, "Another video playing!")
@@ -970,7 +1371,9 @@ async def on_message(message):
             players[message.server.id] = player
             player.start()
 
-    if (message.content.upper().startswith("!QUEUE")):
+    if (message.content.upper().startswith("!QUEUE") or message.content.upper().startswith("!YT")):
+        if (client.is_voice_connected(message.author.server) == False):
+            await client.send_message(message.channel, "Summon me first to your channel! *!summon")
         url = ""
         notFound = True
         for x in range(0, len(message.content)):
@@ -987,6 +1390,11 @@ async def on_message(message):
                     await client.send_message(message.channel, "Added video to queue!")
                     playQueue.put(url)
                     return
+                if (pauseQueue.empty() == False):
+                    print("paused but still added to que")
+                    playQueue.put(url)
+                    await client.send_message(message.channel, "Added video to queue!")
+                    return
             except:
                 pass
         voice = client.voice_client_in(message.author.server)
@@ -994,6 +1402,7 @@ async def on_message(message):
         player.volume = 0.3
         players[message.server.id] = player
         player.start()
+        await client.change_presence(game=discord.Game(name=await getYoutubeTitle(url)))
         djMode = True
         client.loop.create_task(check_if_playing(message))
 
@@ -1027,10 +1436,7 @@ async def on_message(message):
             await client.send_message(message.channel, "Invalid value!")
         else:
             try:
-                print(value)
-                print(players[message.server.id].volume)
                 players[message.server.id].volume = float(value)
-                print(players[message.server.id].volume)
             except:
                 pass
 
@@ -1042,11 +1448,128 @@ async def on_message(message):
 
     if (message.content.upper() == "!STOP"):
         try:
+            if (radioQueue.empty() == False):
+                radioQueue.get()
             while (playQueue.empty() == False):
                 playQueue.get()
             players[message.server.id].stop()
+            await client.change_presence(game=discord.Game(name='!commands'))
         except:
             pass
+
+    #SEARCH
+    if (message.content.upper().startswith("!PLAY")):
+        if (client.is_voice_connected(message.author.server) == False):
+            await client.send_message(message.channel, "Summon me first to your channel! *!summon")
+            return
+        value = ""
+        notFound = True
+        for x in range(0, len(message.content)):
+            if (message.content[x] == ' ' and notFound):
+                notFound = False
+                continue
+            if (notFound == False):
+                if (message.content[x] == ' '):
+                    value += '+'
+                else:
+                    value += message.content[x]
+        if (len(value) <= 1 or value[0] == ""):
+            await client.send_message(message.channel, "Invalid search!")
+            return
+        else:
+            url = await searchYT(value)
+            try:
+                if (players[message.server.id].is_playing()):
+                    await client.send_message(message.channel, "Added video to queue!")
+                    playQueue.put(url)
+                    return
+                if (pauseQueue.empty() == False):
+                    print("paused but still added to que")
+                    playQueue.put(url)
+                    await client.send_message(message.channel, "Added video to queue!")
+                    return
+            except:
+                pass
+        voice = client.voice_client_in(message.author.server)
+        player = await voice.create_ytdl_player(url)
+        player.volume = 0.3
+        players[message.server.id] = player
+        await client.change_presence(game=discord.Game(name=await getYoutubeTitle(url)))
+        player.start()
+        client.loop.create_task(check_if_playing(message))
+
+        #get radio playing song
+    if (message.content.upper() == "!SONG"):
+        if (players[message.server.id].is_playing() == False):
+            await client.send_message(message.channel, "Radio is not on!")
+            return
+        url = radioQueue.get()
+        radioQueue.put(url)
+        await client.send_message(message.channel, await getRadioSong(url))
+
+    if (message.content.upper() == "!RADIOROCK"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        url = "http://icelive0.80692-icelive0.cdn.qbrick.com/10565/80692_RadioRock.mp3"
+        radioQueue.put("https://biisit.info/rock")
+        voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player(url)
+        player.volume = 0.3
+        players[message.server.id] = player
+        player.start()
+        await client.change_presence(game=discord.Game(name='Radio Rock'))
+
+    if (message.content.upper() == "!HITMIX"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        url = "http://icelive0-80692-icelive0.dna.qbrick.com/10162/80692_HitMix.mp3"
+        radioQueue.put("https://biisit.info/hitmix")
+        voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player(url)
+        player.volume = 0.3
+        players[message.server.id] = player
+        player.start()
+        await client.change_presence(game=discord.Game(name='HitMix'))
+
+    if (message.content.upper() == "!NRJ"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        url = "http://cdn.nrjaudio.fm/adwz1/fi/35001/mp3_128.mp3"
+        radioQueue.put("https://biisit.info/nrj")
+        voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player(url)
+        player.volume = 0.3
+        players[message.server.id] = player
+        player.start()
+        await client.change_presence(game=discord.Game(name='NRJ'))
+
+    if (message.content.upper() == "!LOOP"):
+        try:
+            if (players[message.server.id].is_playing()):
+                await client.send_message(message.channel, "Currently playing! use !stop to stop playing")
+                return
+        except:
+            pass
+        url = "http://icelive0.80692-icelive0.cdn.qbrick.com/10561/80692_Loop.mp3"
+        radioQueue.put("https://biisit.info/loop")
+        voice = client.voice_client_in(message.author.server)
+        player = voice.create_ffmpeg_player(url)
+        player.volume = 0.3
+        players[message.server.id] = player
+        player.start()
+        await client.change_presence(game=discord.Game(name='Loop'))
 
     if (message.content.upper() == "!CLEARQUE"):
         while (playQueue.empty() == False):

@@ -1,4 +1,4 @@
-import discord
+﻿import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
 import asyncio
@@ -43,15 +43,11 @@ async def playedWith(author,msg,client,givenID):
         i = 0
         while True:
             try:
-                print(str(data[i]['match_id']))
                 matches.append(str(data[i]['match_id']))
                 i = i + 1
             except IndexError:
                 i = 0
                 break
-        print("Number of matches played with: ")
-        print(len(matches))
-        print("Match id('s): ")
         e = discord.Embed(title=str(data2['profile']['personaname']), url="https://www.dotabuff.com/players/" + givenID, color=0xffffff)
         thumbnail = str(data2['profile']['avatarmedium'])
         e.set_thumbnail(url=thumbnail)
@@ -121,10 +117,6 @@ async def queryProfileNoAuth(msg,client,ID):
                 heroWinRates.append(bestHeroes[y])
                 y = y + 2
                 x = x + 2
-            print("heroids:")
-            print(heroNames)
-            print("herowrs:")
-            print(heroWinRates)
             c = 0
             for x in range(0, len(heroNames)):
                 if (int(heroNames[c]) <= 23):
@@ -136,8 +128,6 @@ async def queryProfileNoAuth(msg,client,ID):
                 if (int(heroNames[c]) == 120):
                     heroNamesFinal.append(str(data3['heroes'][114]['localized_name']))
                 c = c + 1
-            print("heronames:")
-            print(heroNamesFinal)
             name = str(data['profile']['personaname'])
             wins = str(data2['win'])
             lBoardRank = str(data['leaderboard_rank'])
@@ -237,10 +227,6 @@ async def queryProfile(author,msg,client):
                 heroWinRates.append(bestHeroes[y])
                 y = y + 2
                 x = x + 2
-            print("heroids:")
-            print(heroNames)
-            print("herowrs:")
-            print(heroWinRates)
             c = 0
             for x in range(0, len(heroNames)):
                 if (int(heroNames[c]) <= 23):
@@ -252,8 +238,6 @@ async def queryProfile(author,msg,client):
                 if (int(heroNames[c]) == 120):
                     heroNamesFinal.append(str(data3['heroes'][114]['localized_name']))
                 c = c + 1
-            print("heronames:")
-            print(heroNamesFinal)
             name = str(data['profile']['personaname'])
             wins = str(data2['win'])
             lBoardRank = str(data['leaderboard_rank'])
@@ -329,8 +313,6 @@ async def queryLastMatch(author,msg,client):
         if (len(r2.content) <= 6):
             await client.send_message(msg.channel, "No matches found or invalid ID given!")
             return
-        print("Match ID:  ")
-        print(matchID)
         i = 0
         while True:
             try:
@@ -341,7 +323,6 @@ async def queryLastMatch(author,msg,client):
                 i = i + 1
             except IndexError:
                 break
-        print(playerIDs)
         await client.send_message(msg.channel, playerIDs)
     except requests.exceptions.RequestException as b:
         print(b)
@@ -373,8 +354,6 @@ async def queryHelper(author):
             return
         if (len(r2.content) <= 6):
             return
-        print("Match ID:  ")
-        print(matchID)
         i = 0
         while True:
             try:
@@ -404,9 +383,7 @@ async def playedWithLastGame(givenIDs, myID, msg, client):
     print(IDs)
 
     for x in range(0,len(IDs)):
-        print("loopis")
         if (givenIDs[x] not in whitelist):
-            print("ifsisäal")
             matches = []
             try:
                 URL = "https://api.opendota.com/api/players/" + myID + "/matches?included_account_id=" + givenIDs[x]
@@ -424,9 +401,6 @@ async def playedWithLastGame(givenIDs, myID, msg, client):
                     except IndexError:
                         i = 0
                         break
-                print("Number of matches played with: ")
-                print(len(matches))
-                print("Match id('s): ")
                 e = discord.Embed(title=str(data2['profile']['personaname']),
                                   url="https://www.dotabuff.com/players/" + givenIDs[x], color=0xffffff)
                 thumbnail = str(data2['profile']['avatarmedium'])
@@ -455,8 +429,6 @@ async def getProfileID(author):
     if author in namesAndIDs:
         index = namesAndIDs.index(author) - 1
         ID = namesAndIDs[index]
-        print("mit vitu")
-        print(ID)
         return ID
     return "None"
 
@@ -469,3 +441,42 @@ async def leave(self, client):
         await state.voice.disconnect()
     except:
         pass
+
+async def getYoutubeTitle(url):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
+    title = soup.find('span', {'class': 'watch-title'}).text
+    return title
+
+async def searchYT(param):
+    url = "https://www.youtube.com/results?search_query=" + param
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
+    try:
+        #ytURL = soup.find('div', {'class': 'yt-lockup-thumbnail'},href=True).text
+        for a in soup.find_all('a', href=True):
+            if (len(a['href']) == 20 and a['href'][0] == '/'):
+                print(a['href'])
+                return "https://www.youtube.com" + a['href']
+            #print("Found the URL:", a['href'])
+            #print(len(a['href']))
+    except:
+        print("unable to find")
+    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+async def getRadioSong(url):
+
+    #This is still kinda broken
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36',
+        'cache-control': 'private, max-age=0, no-cache'
+    }
+    r = requests.get(url,headers=headers)
+    print(url)
+    print(r.text)
+    soup = BeautifulSoup(r.text, "html.parser")
+    title = soup.find('div',{'class':'nytsoikappale'})
+    print(title)
+    print(title.text)
+    return title.text
