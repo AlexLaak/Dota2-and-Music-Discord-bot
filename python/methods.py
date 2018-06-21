@@ -168,7 +168,7 @@ async def queryProfile(author,msg,client):
     except (OSError, IOError):
         namesAndIDs = []
     if author in namesAndIDs:
-        index = namesAndIDs.index(author) - 1
+        index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
         try:
             URL = "https://api.opendota.com/api/players/" + ID + "/"
@@ -297,7 +297,7 @@ async def queryLastMatch(author,msg,client):
     except (OSError, IOError):
         namesAndIDs = []
     if author in namesAndIDs:
-        index = namesAndIDs.index(author) - 1
+        index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
     try:
         URL = "https://api.opendota.com/api/players/" + ID + "/recentMatches"
@@ -339,7 +339,7 @@ async def queryHelper(author):
     except (OSError, IOError):
         namesAndIDs = []
     if author in namesAndIDs:
-        index = namesAndIDs.index(author) - 1
+        index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
     try:
         URL = "https://api.opendota.com/api/players/" + ID + "/recentMatches"
@@ -427,7 +427,7 @@ async def getProfileID(author):
         namesAndIDs = []
     print(author)
     if author in namesAndIDs:
-        index = namesAndIDs.index(author) - 1
+        index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
         return ID
     return "None"
