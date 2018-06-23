@@ -144,7 +144,9 @@ async def on_message(message):
 
         if (len(message.content) >= 48):
             DotaID = str(re.findall('\d+', message.content)[0])
-            print(DotaID)
+            if (len(DotaID) < len(message.content)):
+                message.content = DotaID
+                DotaID = message.content
 
         if (len(DotaID) < len(message.content)):
             message.content = DotaID
@@ -174,7 +176,9 @@ async def on_message(message):
 
         if (len(message.content) >= 48):
             DotaID = str(re.findall('\d+', message.content)[0])
-            print(DotaID)
+            if (len(DotaID) < len(message.content)):
+                message.content = DotaID
+                DotaID = message.content
 
         if (len(DotaID) < len(message.content)):
             message.content = DotaID
