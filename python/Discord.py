@@ -139,10 +139,16 @@ async def on_message(message):
         await queryProfile(message.author.id,message,client)
 
     if (message.content.upper().startswith("!PROFILE")):
-        print("Comamnd was given by:")
-        print(message.author)
-        DotaID = ""                                                         #For parsing ID from message
+        DotaID = ""
         notFound = True
+
+        if (len(message.content) >= 48):
+            DotaID = str(re.findall('\d+', message.content)[0])
+            print(DotaID)
+
+        if (len(DotaID) < len(message.content)):
+            message.content = DotaID
+
         for x in range(0, len(message.content)):
             if (message.content[x] == ' ' and notFound):
                 notFound = False
@@ -150,9 +156,10 @@ async def on_message(message):
             if (notFound == False):
                 DotaID += message.content[x]
         if (len(DotaID) <= 2 or DotaID[0] == ""):
-            await client.send_message(message.channel, "Invalid ID!")       #-----
+            await client.send_message(message.channel, "Invalid ID!")
         else:
             if (len(DotaID) >= 16):
+                print(DotaID)
                 DotaID = int(DotaID) - steamIDremoval
                 DotaID = str(DotaID)
                 print(DotaID)
@@ -1365,7 +1372,7 @@ async def on_message(message):
 
     if (message.content.upper() == "EXIT" and message.author.id == '95497315078381568'):
         pickle.dump(namesAndIDs,open("save.p","wb"))
-        exit()
+        quit()
 
     #DEPRECATED
     if (message.content.upper().startswith("!vanhaaa")):
@@ -1602,4 +1609,4 @@ async def on_message(message):
         await client.join_voice_channel(message.author.voice_channel)
 
 
-client.run("token") #Replace token with your bots token
+client.run("token here")
