@@ -1469,7 +1469,6 @@ async def on_message(message):
         pListSongQueue.get()
         client.loop.create_task(check_if_playing(message))
 
-    #MULTIPROCESSING TÄHÄ TÄÄ VITU MÄSÄNÄ LAGAA IHA HUOLEL ####muue toimii, queue kaataa playeri biisi vaion jälkee
     if (message.content.upper() == "!QUEUE"):
         if (pListSongQueue.empty() == True):
             #print(list(playQueue.queue))
