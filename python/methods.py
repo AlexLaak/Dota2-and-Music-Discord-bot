@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
 import asyncio
@@ -25,7 +25,7 @@ async def playedWith(author,msg,client,givenID):
     except (OSError, IOError):
         namesAndIDs = []
     if author in namesAndIDs:
-        index = namesAndIDs.index(author) - 1
+        index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
     try:
         URL = "https://api.opendota.com/api/players/" + ID + "/matches?included_account_id=" + givenID
@@ -170,6 +170,7 @@ async def queryProfile(author,msg,client):
     if author in namesAndIDs:
         index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
+        print(ID)
         try:
             URL = "https://api.opendota.com/api/players/" + ID + "/"
             URL2 = "https://api.opendota.com/api/players/" + ID + "/wl"
@@ -338,9 +339,11 @@ async def queryHelper(author):
         namesAndIDs = pickle.load(open("save.p", "rb"))
     except (OSError, IOError):
         namesAndIDs = []
+    print(author)
     if author in namesAndIDs:
         index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
+        print(ID)
     try:
         URL = "https://api.opendota.com/api/players/" + ID + "/recentMatches"
         r = requests.get(url=URL)
@@ -480,3 +483,50 @@ async def getRadioSong(url):
     print(title)
     print(title.text)
     return title.text
+
+async def getPlaylistLinks(url):
+    list = []
+    sourceCode = requests.get(url).text
+    soup = BeautifulSoup(sourceCode, 'html.parser')
+    domain = 'https://www.youtube.com'
+    for link in soup.find_all("a", {"class":"spf-link"}):
+        href = link.get('href')
+        if href.startswith('/watch?'):
+            if domain + href[:20] not in list:
+                list.append(domain + href[:20])
+    return list
+
+async def getPlaylistTitles(url):
+    songs = []
+    sourceCode = requests.get(url).text
+    soup = BeautifulSoup(sourceCode, 'html.parser')
+    domain = 'https://www.youtube.com'
+    for link in soup.find_all("h4", {"class": "yt-ui-ellipsis yt-ui-ellipsis-2"}):
+        print(link)
+    return songs
+
+async def getPlaylistTitlesAndUrls(url):
+    songs = []
+    links = []
+    endList = []
+    sourceCode = requests.get(url).text
+    soup = BeautifulSoup(sourceCode, 'html.parser')
+    domain = 'https://www.youtube.com'
+    for link in soup.find_all("a", {"class": "spf-link"}):
+        for test in soup.find_all("h4", {"class": "yt-ui-ellipsis yt-ui-ellipsis-2"}):
+            title = test.string
+            href = link.get('href')
+            if href.startswith('/watch?'):
+                if domain + href[:20] and title not in songs:
+                    songs.append(title)
+                    links.append(domain + href[:20])
+                    break
+    for x in range(0,len(songs)):
+        try:
+            endList.append(songs[x])
+            endList.append(links[x+2])
+        except IndexError:
+            endList.remove(endList[len(endList)-1])
+            break
+
+    return endList

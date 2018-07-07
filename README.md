@@ -7,7 +7,9 @@ Play short music clips preadded or add your own, play straight from youtube with
 For full command list use !commands
 
 
-Pre req: Python v3.*
+Pre req: Python v3.4.5 or higher
+
+Windows:
 
 For sound playback:
 ```
@@ -27,3 +29,20 @@ Running on bash:
 cd <project folder>
 python Discord.py
 ```
+
+
+
+Unix:
+```
+1. Clone repo `git clone https://github.com/AlexLaak/Dota2-and-Music-Discord-bot.git`
+2. Install python-pip3 if not already installed. `sudo apt install python3-pip`
+3. Install dependencies:
+	sudo apt-get ffmpeg
+	pip3 install discord.py
+	pip3 install beautifulsoup4
+	pip3 install PyNaCl
+	pip3 install youtube-dl
+4. Insert your discord bot token into last row in Discord.py
+5. cd python && python3 Discord.py
+```	
+

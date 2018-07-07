@@ -16,6 +16,7 @@ players = {}
 pauseQueue = queue.Queue()
 playQueue = queue.Queue()
 radioQueue = queue.Queue()
+pListSongQueue = queue.Queue()
 
 steamIDremoval = 76561197960265728
 
@@ -39,6 +40,12 @@ async def check_if_playing(message):
                 player.start()
                 print("swapping song")
                 await client.change_presence(game=discord.Game(name=await getYoutubeTitle(url)))
+                try:
+                    if (pListSongQueue.empty() == False):
+                        pListSongQueue.get()
+                except:
+                    print("except")
+                    pass
         await asyncio.sleep(5)
 
 @client.event
@@ -49,7 +56,7 @@ async def on_ready():
 async def on_message(message):
 
     channel = message.channel.name
-    if (channel != "pakettipaskaa"):                #To listen only messages from certain channel
+    if (channel != "your channel name"):                #To listen only messages from certain channel
         return
 
     try:
@@ -146,10 +153,6 @@ async def on_message(message):
             DotaID = str(re.findall('\d+', message.content)[0])
             if (len(DotaID) < len(message.content)):
                 message.content = DotaID
-                DotaID = message.content
-
-        if (len(DotaID) < len(message.content)):
-            message.content = DotaID
 
         for x in range(0, len(message.content)):
             if (message.content[x] == ' ' and notFound):
@@ -157,6 +160,7 @@ async def on_message(message):
                 continue
             if (notFound == False):
                 DotaID += message.content[x]
+        print(DotaID)
         if (len(DotaID) <= 2 or DotaID[0] == ""):
             await client.send_message(message.channel, "Invalid ID!")
         else:
@@ -178,7 +182,6 @@ async def on_message(message):
             DotaID = str(re.findall('\d+', message.content)[0])
             if (len(DotaID) < len(message.content)):
                 message.content = DotaID
-                DotaID = message.content
 
         if (len(DotaID) < len(message.content)):
             message.content = DotaID
@@ -209,7 +212,7 @@ async def on_message(message):
         print("Comamnd was given by:")
         print(message.author)
         await client.send_message(message.channel, "List of commands:"
-        "\n```!sounds                        -Displays list of all sound clips"   
+        "\n```!sounds                     -Displays list of all sound clips"   
         "\n"
         "\n!radio                         -Displays list of all radio commands"
         "\n"
@@ -219,7 +222,9 @@ async def on_message(message):
         "\n"
         "\n!play <youtube search>         -Search from youtube and then play."
         "\n"
-        "\n!playque                       -Displays current youtube video queue"
+        "\n!plist <youtube mix link>      -Plays youtube mix"
+        "\n"
+        "\n!queue                         -Displays current youtube video queue"
         "\n"
         "\n!stop                          -Stops music playback and clears queue"
         "\n"
@@ -1374,7 +1379,8 @@ async def on_message(message):
             await voice.disconnect()
         #####SOUNDS END##########
 
-    if (message.content.upper() == "EXIT" and message.author.id == '95497315078381568'):
+	#Closes bot
+    if (message.content.upper() == "EXIT"):
         pickle.dump(namesAndIDs,open("save.p","wb"))
         quit()
 
@@ -1403,7 +1409,7 @@ async def on_message(message):
             players[message.server.id] = player
             player.start()
 
-    if (message.content.upper().startswith("!QUEUE") or message.content.upper().startswith("!YT")):
+    if (message.content.upper().startswith("!YT")):
         if (client.is_voice_connected(message.author.server) == False):
             await client.send_message(message.channel, "Summon me first to your channel! *!summon")
         url = ""
@@ -1438,8 +1444,52 @@ async def on_message(message):
         djMode = True
         client.loop.create_task(check_if_playing(message))
 
-    if (message.content.upper() == "!PLAYQUE"):
-        await client.send_message(message.channel, list(playQueue.queue))
+    if (message.content.upper().startswith("!PLIST")):
+        if (client.is_voice_connected(message.author.server) == False):
+            await client.send_message(message.channel, "Summon me first to your channel! *!summon")
+
+        url = message.content[6:]
+        listOfTitlesAndUrls = await getPlaylistTitlesAndUrls(url)
+        listOfUrls = []
+        for x in range(1,len(listOfTitlesAndUrls),2):
+            listOfUrls.append(listOfTitlesAndUrls[x])
+        for x in range(0, len(listOfTitlesAndUrls),2):
+            pListSongQueue.put(listOfTitlesAndUrls[x])
+        for x in range(0, len(listOfUrls)):
+            playQueue.put(listOfUrls[x])
+
+        song = playQueue.get()
+        voice = client.voice_client_in(message.author.server)
+        player = await voice.create_ytdl_player(song)
+        player.volume = 0.3
+        players[message.server.id] = player
+        player.start()
+        await client.change_presence(game=discord.Game(name=await getYoutubeTitle(song)))
+        djMode = True
+        pListSongQueue.get()
+        client.loop.create_task(check_if_playing(message))
+
+    #MULTIPROCESSING TÄHÄ TÄÄ VITU MÄSÄNÄ LAGAA IHA HUOLEL ####muue toimii, queue kaataa playeri biisi vaion jälkee
+    if (message.content.upper() == "!QUEUE"):
+        if (pListSongQueue.empty() == True):
+            #print(list(playQueue.queue))
+            listt = []
+            listt = list(playQueue.queue)
+            #print(listt)
+            msg = "```"
+            for x in range(0,len(listt)):
+                msg = msg + await getYoutubeTitle(listt[x])
+            msg = msg + "```"
+            await client.send_message(message.channel, msg)
+        else:
+            songlist = []
+            songlist = list(pListSongQueue.queue)
+            msg = "```"
+            for x in range(0,len(songlist)):
+                msg = msg + songlist[x]
+            msg = msg + "```"
+            await client.send_message(message.channel, msg)
+
 
     if (message.content.upper() == "!PAUSE"):
         try:
@@ -1475,6 +1525,8 @@ async def on_message(message):
     if (message.content.upper() == "!SKIP"):
         try:
             players[message.server.id].stop()
+            while (pListSongQueue.empty() == False):
+                pListSongQueue.get()
         except:
             pass
 
@@ -1613,4 +1665,4 @@ async def on_message(message):
         await client.join_voice_channel(message.author.voice_channel)
 
 
-client.run("token here")
+client.run("token here") #Replace token with your bots token
