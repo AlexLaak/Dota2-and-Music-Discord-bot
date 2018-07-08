@@ -12,6 +12,7 @@ Pre req: Python v3.4.5 or higher
 Windows (using git bash):
 ```
 Dependencies:
+
 download ffmpeg from https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-20180708-3a2d21b-win64-static.zip
 move ffmpeg.exe to Dota2-and-Music-Discord-bot/python              #located in /bin folder inside zip
 cd python
