@@ -29,6 +29,8 @@ python Discord.py
 
 Ubuntu:
 ```
+sudo apt-get install -y git
+git clone https://github.com/AlexLaak/Dota2-and-Music-Discord-bot.git
 cd Dota2-and-Music-Discord-bot
 sudo chmod +x setup.sh
 Use 'setup.sh' to setup bot environment.
