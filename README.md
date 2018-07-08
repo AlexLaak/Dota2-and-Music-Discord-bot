@@ -30,7 +30,11 @@ cd <project folder>
 python Discord.py
 ```
 
-
+Ubuntu:
+`cd Dota2-and-Music-Discord-bot`
+`sudo chmod +x setup.sh`
+Use `setup.sh` to setup bot environment.
+`./setup.sh`
 
 Unix:
 ```
