@@ -13,6 +13,7 @@ Windows (using git bash):
 ```
 Dependencies:
 
+git clone https://github.com/AlexLaak/Dota2-and-Music-Discord-bot.git
 download ffmpeg from https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-20180708-3a2d21b-win64-static.zip
 move ffmpeg.exe to Dota2-and-Music-Discord-bot/python              #located in /bin folder inside zip
 cd python
