@@ -1,5 +1,4 @@
 sudo apt-get update
-sudo apt-get install -y git
 sudo apt-get install -y python3
 sudo apt-get install -y python3-pip
 cd Dota2-and-Music-Discord-bot/python
