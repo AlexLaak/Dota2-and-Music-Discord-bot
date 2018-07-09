@@ -56,7 +56,7 @@ async def on_ready():
 async def on_message(message):
 
     channel = message.channel.name
-    if (channel != "your channel name"):                #To listen only messages from certain channel
+    if (channel != "discord text channel here"):                #To listen only messages from certain channel
         return
 
     try:
@@ -183,15 +183,13 @@ async def on_message(message):
             if (len(DotaID) < len(message.content)):
                 message.content = DotaID
 
-        if (len(DotaID) < len(message.content)):
-            message.content = DotaID
-
         for x in range(0, len(message.content)):
             if (message.content[x] == ' ' and notFound):
                 notFound = False
                 continue
             if (notFound == False):
                 DotaID += message.content[x]
+        print(DotaID)
         if (len(DotaID) <= 2 or DotaID[0] == ""):
             await client.send_message(message.channel, "Invalid ID!")
         else:
@@ -328,7 +326,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/aaa.mp3')
+        player = voice.create_ffmpeg_player('../sounds/aaa.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -372,7 +370,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/jafar.mp3')
+        player = voice.create_ffmpeg_player('../sounds/jafar.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -402,7 +400,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/enigma.mp3')
+        player = voice.create_ffmpeg_player('../sounds/enigma.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -431,7 +429,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/Pud_laugh_05.mp3')
+        player = voice.create_ffmpeg_player('../sounds/Pud_laugh_05.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -461,7 +459,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/Chaknight_laugh_17.mp3')
+        player = voice.create_ffmpeg_player('../sounds/Chaknight_laugh_17.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -490,7 +488,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/clasu.mp3')
+        player = voice.create_ffmpeg_player('../sounds/clasu.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -519,7 +517,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/havitty.mp3')
+        player = voice.create_ffmpeg_player('../sounds/havitty.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -548,7 +546,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/kivääri.mp3')
+        player = voice.create_ffmpeg_player('../sounds/kivääri.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -577,7 +575,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/marko1.mp3')
+        player = voice.create_ffmpeg_player('../sounds/marko1.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -606,7 +604,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/morjesta.mp3')
+        player = voice.create_ffmpeg_player('../sounds/morjesta.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -635,7 +633,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/motigone.mp3')
+        player = voice.create_ffmpeg_player('../sounds/motigone.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -664,7 +662,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/muija.mp3')
+        player = voice.create_ffmpeg_player('../sounds/muija.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -693,7 +691,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/oliivi.mp3')
+        player = voice.create_ffmpeg_player('../sounds/oliivi.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -722,7 +720,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/onkelma.mp3')
+        player = voice.create_ffmpeg_player('../sounds/onkelma.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -751,7 +749,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/paskaa.mp3')
+        player = voice.create_ffmpeg_player('../sounds/paskaa.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -780,7 +778,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/potkin.mp3')
+        player = voice.create_ffmpeg_player('../sounds/potkin.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -809,7 +807,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/rakas.mp3')
+        player = voice.create_ffmpeg_player('../sounds/rakas.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -838,7 +836,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/sandstorm.mp3')
+        player = voice.create_ffmpeg_player('../sounds/sandstorm.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -867,7 +865,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/sinnemeni.mp3')
+        player = voice.create_ffmpeg_player('../sounds/sinnemeni.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -896,7 +894,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/turpakii.mp3')
+        player = voice.create_ffmpeg_player('../sounds/turpakii.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -925,7 +923,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/arkiviholinen.mp3')
+        player = voice.create_ffmpeg_player('../sounds/arkiviholinen.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -954,7 +952,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/leivat.mp3')
+        player = voice.create_ffmpeg_player('../sounds/leivat.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -983,7 +981,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/2kgsiika.mp3')
+        player = voice.create_ffmpeg_player('../sounds/2kgsiika.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1012,7 +1010,7 @@ async def on_message(message):
             joined = False
         else:
              voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/kuvaa.mp3')
+        player = voice.create_ffmpeg_player('../sounds/kuvaa.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1041,7 +1039,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/motko.mp3')
+        player = voice.create_ffmpeg_player('../sounds/motko.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1070,7 +1068,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/otasiika.mp3')
+        player = voice.create_ffmpeg_player('../sounds/otasiika.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1099,7 +1097,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/siikahan.mp3')
+        player = voice.create_ffmpeg_player('../sounds/siikahan.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1128,7 +1126,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/terv.mp3')
+        player = voice.create_ffmpeg_player('../sounds/terv.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1157,7 +1155,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/aamupala.mp3')
+        player = voice.create_ffmpeg_player('../sounds/aamupala.mp3')
         players[message.server.id] = player
         player.start()
         counter = 0
@@ -1186,7 +1184,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/jonirepe.mp3')
+        player = voice.create_ffmpeg_player('../sounds/jonirepe.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1216,7 +1214,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/jonisekoo.mp3')
+        player = voice.create_ffmpeg_player('../sounds/jonisekoo.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1246,7 +1244,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/jonilogic.mp3')
+        player = voice.create_ffmpeg_player('../sounds/jonilogic.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1276,7 +1274,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/lehtonen.mp3')
+        player = voice.create_ffmpeg_player('../sounds/lehtonen.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1306,7 +1304,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/joona.mp3')
+        player = voice.create_ffmpeg_player('../sounds/joona.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1336,7 +1334,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/limaa.mp3')
+        player = voice.create_ffmpeg_player('../sounds/limaa.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1366,7 +1364,7 @@ async def on_message(message):
             joined = False
         else:
             voice = client.voice_client_in(message.author.server)
-        player = voice.create_ffmpeg_player('./sounds/jonichrono.mp3')
+        player = voice.create_ffmpeg_player('../sounds/jonichrono.mp3')
         player.volume = 2.0
         players[message.server.id] = player
         player.start()
@@ -1662,6 +1660,4 @@ async def on_message(message):
         voice = client.voice_client_in(message.author.server)
         await voice.disconnect()
         await client.join_voice_channel(message.author.voice_channel)
-
-
 client.run("token here") #Replace token with your bots token

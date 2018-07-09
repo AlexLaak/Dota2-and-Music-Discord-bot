@@ -1,4 +1,4 @@
-import discord
+﻿import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
 import asyncio
@@ -170,7 +170,6 @@ async def queryProfile(author,msg,client):
     if author in namesAndIDs:
         index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
-        print(ID)
         try:
             URL = "https://api.opendota.com/api/players/" + ID + "/"
             URL2 = "https://api.opendota.com/api/players/" + ID + "/wl"
@@ -339,11 +338,9 @@ async def queryHelper(author):
         namesAndIDs = pickle.load(open("save.p", "rb"))
     except (OSError, IOError):
         namesAndIDs = []
-    print(author)
     if author in namesAndIDs:
         index = namesAndIDs.index(author) - 2
         ID = namesAndIDs[index]
-        print(ID)
     try:
         URL = "https://api.opendota.com/api/players/" + ID + "/recentMatches"
         r = requests.get(url=URL)
@@ -456,32 +453,23 @@ async def searchYT(param):
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
     try:
-        #ytURL = soup.find('div', {'class': 'yt-lockup-thumbnail'},href=True).text
         for a in soup.find_all('a', href=True):
             if (len(a['href']) == 20 and a['href'][0] == '/'):
                 print(a['href'])
                 return "https://www.youtube.com" + a['href']
-            #print("Found the URL:", a['href'])
-            #print(len(a['href']))
     except:
         print("unable to find")
     return "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 async def getRadioSong(url):
 
-    #This is still kinda broken
-
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36',
         'cache-control': 'private, max-age=0, no-cache'
     }
     r = requests.get(url,headers=headers)
-    print(url)
-    print(r.text)
     soup = BeautifulSoup(r.text, "html.parser")
     title = soup.find('div',{'class':'nytsoikappale'})
-    print(title)
-    print(title.text)
     return title.text
 
 async def getPlaylistLinks(url):
