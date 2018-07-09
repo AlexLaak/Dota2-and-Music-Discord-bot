@@ -9,28 +9,33 @@ For full command list use !commands
 
 Pre req: Python v3.4.5 or higher
 
-Windows:
-
-For sound playback:
-```
-add ffmpeg.exe to project folder
+Windows (using git bash):
 ```
 Dependencies:
-```
+
+git clone https://github.com/AlexLaak/Dota2-and-Music-Discord-bot.git
+download ffmpeg from https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-20180708-3a2d21b-win64-static.zip
+move ffmpeg.exe to Dota2-and-Music-Discord-bot/python              #located in /bin folder inside zip
+cd python
 py -3 -m pip install discord
 py -3 -m pip install beautifulsoup4
 py -3 -m pip install PyNaCl
 py -3 -m pip install youtube-dl
-
-```
     
 Running on bash:
-```
-cd <project folder>
+cd Dota2-and-Music-Discord-bot/python
 python Discord.py
 ```
 
-
+Ubuntu:
+```
+sudo apt-get install -y git
+git clone https://github.com/AlexLaak/Dota2-and-Music-Discord-bot.git
+cd Dota2-and-Music-Discord-bot
+sudo chmod +x setup.sh
+Use 'setup.sh' to setup bot environment.
+./setup.sh
+```
 
 Unix:
 ```
