@@ -3,6 +3,7 @@ sudo apt-get install -y python3
 sudo apt-get install -y python3-pip
 cd Dota2-and-Music-Discord-bot/python
 sudo apt-get install -y ffmpeg
+pip3 install --upgrade setuptools
 pip3 install discord.py
 pip3 install beautifulsoup4
 pip3 install PyNaCl
